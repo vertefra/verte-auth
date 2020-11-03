@@ -44,10 +44,33 @@ func main() {
 	})
 
 	// Routes groups
+
+	// public
 	usersAPI := app.Group("/api/users")
-	accountAPI := app.Group("/api/users/:userID/accounts")
+
+	accountAPI := app.Group("/api/users/:userID/accounts", func(ctx *fiber.Ctx) error {
+
+		// for the user authentication the key to verify the signature
+		// is collected from env varibales
+
+		key := config.AppConfig.KEY
+		data, err := middleware.ExtractTokenMetadata(ctx, key)
+		if err != nil {
+			return err
+		}
+
+		ctx.Locals("tokenData", *data)
+		return ctx.Next()
+
+	})
+
 	privateAPI := app.Group("/private/accounts/:accountID", func(ctx *fiber.Ctx) error {
-		data, err := middleware.ExtractTokenMetadata(ctx)
+
+		// the authorization key will be collected from the auth header for all the
+		// users authorization projects
+
+		key := ctx.Get("key")
+		data, err := middleware.ExtractTokenMetadata(ctx, key)
 		if err != nil {
 			return err
 		}

@@ -15,13 +15,13 @@ type AccessDetails struct {
 }
 
 // ExtractTokenMetadata verify the token and returns the encoded metadata
-func ExtractTokenMetadata(ctx *fiber.Ctx) (*AccessDetails, error) {
+func ExtractTokenMetadata(ctx *fiber.Ctx, key string) (*AccessDetails, error) {
 
-	if err := tokenValid(ctx); err != nil {
+	if err := tokenValid(ctx, key); err != nil {
 		return nil, err
 	}
 
-	token, err := verifyToken(ctx)
+	token, err := verifyToken(ctx, key)
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +39,8 @@ func ExtractTokenMetadata(ctx *fiber.Ctx) (*AccessDetails, error) {
 	return nil, err
 }
 
-func tokenValid(ctx *fiber.Ctx) error {
-	token, err := verifyToken(ctx)
+func tokenValid(ctx *fiber.Ctx, key string) error {
+	token, err := verifyToken(ctx, key)
 	if err != nil {
 		return err
 	}
@@ -52,9 +52,7 @@ func tokenValid(ctx *fiber.Ctx) error {
 
 }
 
-func verifyToken(ctx *fiber.Ctx) (*jwt.Token, error) {
-
-	key := ctx.Get("key")
+func verifyToken(ctx *fiber.Ctx, key string) (*jwt.Token, error) {
 
 	if key == "" {
 		err := fmt.Errorf("Error key not present")

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"github/vertefra/verte_auth_server/config"
 	"github/vertefra/verte_auth_server/models"
 	"github/vertefra/verte_auth_server/utils"
 
@@ -40,7 +41,6 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 		}
 
 		// Creating API key
-
 		key := utils.GenerateRanKey(8)
 
 		// Assigning crypted password and api Key
@@ -85,7 +85,14 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 
 		// Passwords match, generate auth token
 
-		t, err := utils.GenerateToken(user.Email, 24, user.Key)
+		// For the user that subscribe to the service the key used to
+		// sign the toke is the one stored in the .env file, while for the
+		// authentication service the key is the randomly generated one
+		// that will be sent in the header requests
+
+		tokenKey := config.AppConfig.KEY
+
+		t, err := utils.GenerateToken(user.Email, 24, tokenKey)
 		if err != nil {
 			return err
 		}
@@ -95,6 +102,7 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 			"token":   t,
 			"key":     user.Key,
 			"userId":  user.ID,
+			"email":   user.Email,
 		})
 		return nil
 	})
