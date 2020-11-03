@@ -14,7 +14,20 @@ import (
 func main() {
 
 	godotenv.Load()
-	app := fiber.New()
+
+	app := fiber.New(fiber.Config{
+		// TODO: refactor in middleware
+		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+
+			ctx.Set(fiber.HeaderContentType, fiber.MIMETextPlainCharsetUTF8)
+			ctx.JSON(fiber.Map{
+				"success": false,
+				"error":   err.Error(),
+			})
+
+			return nil
+		},
+	})
 
 	// CHANGE TO true TO DROP THE DATABASE.
 	if err := database.DropDb(false); err != nil {
@@ -54,6 +67,7 @@ func main() {
 		// is collected from env varibales
 
 		key := config.AppConfig.KEY
+		config.Err(key)
 		data, err := middleware.ExtractTokenMetadata(ctx, key)
 		if err != nil {
 			return err

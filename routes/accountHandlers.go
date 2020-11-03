@@ -164,9 +164,40 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 		return nil
 	})
 
+	// @route	GET /api/users/:userID/accounts
+	// @desc	gets all the credentials stored under the user with id userID
+	// @token	You need to send the auth token in the request header
+
 	r.Get("/", func(ctx *fiber.Ctx) error {
-		id := ctx.Params("userID")
-		ctx.SendString("TEST TEST ID id " + id)
+		config.Msg("Hit")
+
+		userID, err := strconv.ParseUint(ctx.Params("userID"), 10, 64)
+		if err != nil {
+			ctx.Status(404)
+			err = fmt.Errorf("ID sent in url probably incorrect - %v", err)
+			return err
+		}
+
+		tokenData := ctx.Locals("tokenData")
+
+		config.Err("token data=> ", tokenData)
+
+		accounts := new([]models.Account)
+
+		result := db.Table("accounts").Where(
+			&models.Account{OwnerID: uint(userID)}).Find(accounts)
+
+		if result.Error != nil {
+			err := fmt.Errorf("Error Retrieving data from database - %v", result.Error)
+			ctx.Status(404)
+			return err
+		}
+
+		ctx.Status(201).JSON(fiber.Map{
+			"success":  true,
+			"accounts": accounts,
+		})
+
 		return nil
 	})
 }

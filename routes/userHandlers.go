@@ -25,18 +25,21 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 
 		user, err := models.ParseUser(ctx)
 		if err != nil {
+			ctx.Status(404)
 			return err
 		}
 
 		// Checking if user is already in the database
 		if user.IsPresent(db) {
 			err := fmt.Errorf("%s is already in the database", user.Email)
+			ctx.Status(404)
 			return err
 		}
 
 		// Ashing password
 		hashedPass, err := utils.Encrypt(user.Password)
 		if err != nil {
+			ctx.Status(500)
 			return err
 		}
 
@@ -51,6 +54,7 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 		// result
 		result := db.Create(user)
 		if result.Error != nil {
+			ctx.Status(500)
 			return result.Error
 		}
 
@@ -68,6 +72,7 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 
 		user, err := models.ParseUser(ctx)
 		if err != nil {
+			ctx.Status(404)
 			return err
 		}
 
@@ -76,10 +81,12 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 
 		result := db.Table("users").Where(&models.User{Email: user.Email}).First(user)
 		if result.Error != nil {
+			ctx.Status(500)
 			return result.Error
 		}
 
 		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(p)); err != nil {
+			ctx.Status(404)
 			return err
 		}
 
@@ -94,6 +101,7 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 
 		t, err := utils.GenerateToken(user.Email, 24, tokenKey)
 		if err != nil {
+			ctx.Status(500)
 			return err
 		}
 
