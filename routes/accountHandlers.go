@@ -16,8 +16,8 @@ import (
 func AccountHandler(r fiber.Router, db *gorm.DB) {
 
 	// @route	POST /api/users/:userID/accounts/signup
-	// @desc	create a new authentication Account for user with userID
-	// @key		only an key in the request body matching the one in stored with the user id will allow to use
+	// @desc	create a new authentication Account belonging to a user with userID
+	// @key     only an key in the request body matching the one in stored with the user id will allow to use
 	// 			this route
 
 	r.Post("/signup", func(ctx *fiber.Ctx) error {
@@ -52,7 +52,7 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 			return err
 		}
 
-		// Finding the User that owns the account
+		// Finding the User that owns the project for the account
 		user, err := models.FindUserByID(db, userID)
 		if err != nil {
 			return err
@@ -169,7 +169,6 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 	// @token	You need to send the auth token in the request header
 
 	r.Get("/", func(ctx *fiber.Ctx) error {
-		config.Msg("Hit")
 
 		userID, err := strconv.ParseUint(ctx.Params("userID"), 10, 64)
 		if err != nil {
@@ -177,10 +176,6 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 			err = fmt.Errorf("ID sent in url probably incorrect - %v", err)
 			return err
 		}
-
-		tokenData := ctx.Locals("tokenData")
-
-		config.Err("token data=> ", tokenData)
 
 		accounts := new([]models.Account)
 
