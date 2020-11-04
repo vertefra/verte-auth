@@ -66,14 +66,14 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 		}
 
 		// creating a token for user authentication. exp time is set to 24 hrs for now
-		t, err := utils.GenerateToken(user.Key, 24, user.Key)
+		t, err := utils.GenerateToken(account.Username, 24, user.Key)
 		if err != nil {
 			return err
 		}
 
 		// Assigning ashed password api key ownerID and token to the account
 		account.Password = hashedPass
-		account.Key = user.Key
+		// account.Key = user.Key
 		account.OwnerID = user.ID
 		account.Token = t
 

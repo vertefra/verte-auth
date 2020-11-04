@@ -59,7 +59,6 @@ projects. These first two routes will be used by the client interface.
 
 ```
 {
-    "key": "aQ8{71D7",
     "success": true,
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6InZlcnRlLmZyYUBnbWFpbC5jb20iLCJleHAiOjE2MDQ0NDE2NDF9.CmDTYMpw890awAhxqaoDXGJeDrwywXfrtyULL2_RNIM",
     "userId": 1
