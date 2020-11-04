@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// ErrorHandler Intercepts all the error error and format them in json
 func ErrorHandler(ctx fiber.Ctx, err error) error {
 
 	code := 500
@@ -17,3 +18,5 @@ func ErrorHandler(ctx fiber.Ctx, err error) error {
 		"error": "this is the error",
 	})
 }
+
+// currently not used

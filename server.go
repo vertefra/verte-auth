@@ -61,21 +61,9 @@ func main() {
 	// public
 	usersAPI := app.Group("/api/users")
 
-	accountAPI := app.Group("/api/users/:userID/accounts", middleware.Private())
+	accountAPI := app.Group("/api/users/:userID/accounts", middleware.UserAuth())
 
-	privateAPI := app.Group("/private/accounts/:accountID", func(ctx *fiber.Ctx) error {
-
-		// the authorization key will be collected from the auth header for all the
-		// users authorization projects
-
-		key := ctx.Get("key")
-		data, err := middleware.ExtractTokenMetadata(ctx, key)
-		if err != nil {
-			return err
-		}
-		ctx.Locals("tokenData", *data)
-		return ctx.Next()
-	})
+	privateAPI := app.Group("/private/accounts/:accountID", middleware.PrivateAccount(db))
 
 	// Routes Handlers
 	routes.UserHandler(usersAPI, db)
