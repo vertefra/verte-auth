@@ -61,22 +61,7 @@ func main() {
 	// public
 	usersAPI := app.Group("/api/users")
 
-	accountAPI := app.Group("/api/users/:userID/accounts", func(ctx *fiber.Ctx) error {
-
-		// for the user authentication the key to verify the signature
-		// is collected from env varibales
-
-		key := config.AppConfig.KEY
-		config.Err(key)
-		data, err := middleware.ExtractTokenMetadata(ctx, key)
-		if err != nil {
-			return err
-		}
-
-		ctx.Locals("tokenData", *data)
-		return ctx.Next()
-
-	})
+	accountAPI := app.Group("/api/users/:userID/accounts", middleware.Private())
 
 	privateAPI := app.Group("/private/accounts/:accountID", func(ctx *fiber.Ctx) error {
 

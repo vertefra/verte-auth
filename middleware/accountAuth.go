@@ -6,12 +6,25 @@ import (
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gofiber/fiber/v2"
+	fiber "github.com/gofiber/fiber/v2"
 )
 
 // AccessDetails access the id encoded in the token
 type AccessDetails struct {
 	ID string
+}
+
+func Private() func(ctx *fiber.Ctx) error {
+	return func(ctx *fiber.Ctx) error {
+		key := config.AppConfig.KEY
+		fmt.Println("Running midddleware in Private", key)
+		data, err := ExtractTokenMetadata(ctx, key)
+		if err != nil {
+			return err
+		}
+		ctx.Locals("tokenData", data)
+		return ctx.Next()
+	}
 }
 
 // ExtractTokenMetadata verify the token and returns the encoded metadata
