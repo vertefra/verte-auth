@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"github/vertefra/verte_auth_server/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -12,10 +13,13 @@ import (
 //
 func PrivateHandler(r fiber.Router, db *gorm.DB) {
 
-	r.Get("/", func(ctx *fiber.Ctx) error {
-		data := ctx.Locals("tokenData")
+	r.Get("/", middleware.PrivateAccount(db), func(ctx *fiber.Ctx) error {
+
+		// for now access details does not contains any meainginful information
+		// just the key passed from the middleware
+		data := ctx.Locals("tokenData").(*middleware.AccessDetails)
 		fmt.Println(data)
-		ctx.SendString("received: ")
+		ctx.SendString("received: " + string(data.ID))
 		return nil
 	})
 }

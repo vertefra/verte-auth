@@ -63,7 +63,7 @@ func main() {
 
 	accountAPI := app.Group("/api/users/:userID/accounts", middleware.UserAuth())
 
-	privateAPI := app.Group("/private/accounts/:accountID", middleware.PrivateAccount(db))
+	privateAPI := app.Group("/private/accounts/:accountID")
 
 	// Routes Handlers
 	routes.UserHandler(usersAPI, db)

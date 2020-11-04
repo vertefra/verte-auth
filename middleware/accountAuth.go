@@ -67,7 +67,7 @@ func PrivateAccount(db *gorm.DB) func(ctx *fiber.Ctx) error {
 
 		ctx.Locals("tokenData", tokenData)
 
-		return nil
+		return ctx.Next()
 	}
 }
 
@@ -119,7 +119,6 @@ func verifyToken(ctx *fiber.Ctx, key string) (*jwt.Token, error) {
 	}
 
 	tokenString := extractToken(ctx)
-	config.Err(tokenString)
 	token, err := jwt.Parse(
 		tokenString, func(token *jwt.Token) (interface{}, error) {
 			_, ok := token.Method.(*jwt.SigningMethodHMAC)
