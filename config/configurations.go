@@ -21,4 +21,11 @@ func (c *config) InitConfig() {
 		c.USER = os.Getenv("DEV_USER")
 	}
 
+	if c.ENV == "production" {
+		c.PORT = os.Getenv("PORT")
+		c.KEY = os.Getenv("KEY")
+		c.DBNAME = os.Getenv("DATABASE_URL")
+		c.USER = os.Getenv("PROD_USER")
+	}
+
 }
