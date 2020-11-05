@@ -119,7 +119,7 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 
 	// @desc	update user info
 	// @route	PUT	/api/users/:id
-	// @public
+	// @private	token key is in .env
 
 	r.Put("/:userID", middleware.UserAuth(), func(ctx *fiber.Ctx) error {
 		user := new(models.User)

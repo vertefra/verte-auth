@@ -105,7 +105,7 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 
 	// @route	POST /api/users/:userID/accounts/login
 	// @desc	verify the Account for user with userID, checking username and password
-	// @public
+	// @public	returns a token signed with the account key
 
 	r.Post("/login", func(ctx *fiber.Ctx) error {
 
@@ -118,19 +118,20 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 		// Saving Text Password to compare later
 		p := account.Password
 
-		// Get access key from headers
-
 		// Checking if username is a valid email
 		if utils.IsEmailValid(account.Username) == false {
+			ctx.Status(401)
 			err := fmt.Errorf("%v is not a valid email", account.Username)
 			return err
 		}
 
 		// Retrieving the account from the database and comparing the ashed passwords
-		result := db.Table("accounts").Where(&models.Account{Username: account.Username}).First(&account)
+		result := db.Table("accounts").Where(
+			&models.Account{Username: account.Username}).First(&account)
 		if result.Error != nil {
 			err := fmt.Errorf("Cant find an account associated with %v", account.Username)
 			result.AddError(err)
+			ctx.Status(404)
 			return result.Error
 		}
 
@@ -138,9 +139,16 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 			return err
 		}
 
+		// Retrieving owner account to get key to create a token and redirect address
+		owner, err := models.FindUserByID(db, account.OwnerID)
+		if err != nil {
+			ctx.Status(500)
+			return err
+		}
+
 		// Generate a token
 		// will contain in the payload the username of the account holder
-		t, err := utils.GenerateToken(account.Username, 24, account.Key)
+		t, err := utils.GenerateToken(account.Username, 24, owner.Key)
 		if err != nil {
 			return err
 		}
@@ -149,8 +157,9 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 		// the user to go if succesfully authenticated
 
 		ctx.JSON(fiber.Map{
-			"success": true,
-			"token":   t,
+			"success":     true,
+			"token":       t,
+			"redirectURL": owner.RedirectURL,
 		})
 
 		return nil
