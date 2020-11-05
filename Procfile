@@ -1,2 +1,2 @@
-worker: go build server.go
-web: ./server prod
+go build 
+web: verte_auth_server prod

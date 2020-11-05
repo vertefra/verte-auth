@@ -23,14 +23,17 @@ var Msg = color.New(color.FgHiGreen).Println
 // Start define the environment variables of the application
 func start(env string) config {
 	var c config
-	cmd := os.Args[:1]
+	cmd := os.Args
 
-	Msg("args are ", cmd)
-
-	if cmd[0] == "dev" {
+	if len(cmd) == 1 {
+		Err("No environment found, running development")
+		c.ENV = "development"
+	} else if cmd[1] == "dev" {
+		Msg("-- Requested environment: ", cmd[1])
 		c.ENV = "development"
 		c.InitConfig()
-	} else if cmd[0] == "prod" {
+	} else if cmd[1] == "prod" {
+		Msg("-- Requested environment: ", cmd[1])
 		c.ENV = "production"
 		c.InitConfig()
 	} else if env == "prod" {
