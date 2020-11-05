@@ -25,6 +25,8 @@ func start() config {
 	var c config
 	cmd := os.Args[:1]
 
+	Msg("args are ", cmd)
+
 	if cmd[0] == "dev" {
 		c.ENV = "development"
 		c.InitConfig()
