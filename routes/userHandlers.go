@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"github/vertefra/verte_auth_server/config"
+	"github/vertefra/verte_auth_server/middleware"
 	"github/vertefra/verte_auth_server/models"
 	"github/vertefra/verte_auth_server/utils"
 
@@ -106,17 +107,37 @@ func UserHandler(r fiber.Router, db *gorm.DB) {
 		}
 
 		ctx.JSON(fiber.Map{
-			"success": true,
-			"token":   t,
-			"key":     user.Key,
-			"userId":  user.ID,
-			"email":   user.Email,
+			"success":     true,
+			"token":       t,
+			"key":         user.Key,
+			"ID":          user.ID,
+			"email":       user.Email,
+			"redirectURL": user.RedirectURL,
 		})
 		return nil
 	})
 
-	r.Get("/", func(ctx *fiber.Ctx) error {
-		ctx.SendString("Hi user")
-		return nil
+	// @desc	update user info
+	// @route	PUT	/api/users/:id
+	// @private	token key is in .env
+
+	r.Put("/:userID", middleware.UserAuth(), func(ctx *fiber.Ctx) error {
+		user := new(models.User)
+		if err := ctx.BodyParser(user); err != nil {
+			ctx.Status(404)
+			return err
+		}
+
+		if ok, err := models.UpdateUser(db, user); !ok {
+			config.Err("Error while updating user")
+			ctx.Status(500)
+			return err
+		}
+
+		return ctx.JSON(fiber.Map{
+			"success": true,
+			"user":    user,
+		})
+
 	})
 }

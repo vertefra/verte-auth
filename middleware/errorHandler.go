@@ -1,22 +1,20 @@
 package middleware
 
 import (
-	"github/vertefra/verte_auth_server/config"
-
 	"github.com/gofiber/fiber/v2"
 )
 
 // ErrorHandler Intercepts all the error error and format them in json
-func ErrorHandler(ctx fiber.Ctx, err error) error {
+func ErrorHandler() func(ctx *fiber.Ctx, err error) error {
 
-	code := 500
-	if e, ok := err.(*fiber.Error); ok {
-		config.Msg(e)
-		code = e.Code
+	return func(ctx *fiber.Ctx, err error) error {
+		ctx.Set(fiber.HeaderContentType, fiber.MIMETextPlainCharsetUTF8)
+		ctx.JSON(fiber.Map{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return nil
 	}
-	return ctx.Status(code).JSON(fiber.Map{
-		"error": "this is the error",
-	})
 }
 
 // currently not used

@@ -11,11 +11,12 @@ import (
 // Account is thje struct with all the authorization fields for a User
 type Account struct {
 	gorm.Model
-	Username string `json:"username"`
-	Password string `json:"password"`
-	OwnerID  uint   `json:"ownerID"`
-	Key      string `json:"key"`
-	Token    string `json:"token"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	OwnerID     uint   `json:"ownerID"`
+	Key         string `json:"key"`
+	Token       string `json:"token"`
+	RedirectURL string `json:"redirectURL"`
 }
 
 // ParseAccount returns the parsed body with Account struct
@@ -61,7 +62,7 @@ func (a *Account) AddAccountToUser(db *gorm.DB, userID uint) error {
 		config.Err("Error: ", err)
 		return err
 	}
-	// Assigning the userID and the api key to the Account
+
 	a.OwnerID = user.ID
 	a.Key = user.Key
 
