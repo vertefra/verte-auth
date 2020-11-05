@@ -14,24 +14,27 @@ import (
 //ConnectDB provide connection with the database specified in the config varibales
 func ConnectDB(automigrate bool) (*gorm.DB, error) {
 
-	// Retrieving the db name from config file
-	dbName := config.AppConfig.DBNAME
-
 	// creating url connection string
-	url := "postgresql:///" + dbName
+	var url string
+
+	if config.AppConfig.ENV == "development" {
+		url = "postgresql:///" + config.AppConfig.DBNAME
+	} else {
+		url = config.AppConfig.DBNAME
+	}
 
 	// Opening database
 	DB, err := gorm.Open(postgres.Open(url), &gorm.Config{})
 	if err != nil {
-		config.Err("\nError while opening database: ", dbName)
+		config.Err("\nError while opening database: ", config.AppConfig.DBNAME)
 		config.Err("Error: ", err)
 		return nil, err
 	}
 
-	config.Msg("database " + dbName + "connected!")
+	config.Msg("-- database " + config.AppConfig.DBNAME + " connected!")
 
 	if automigrate == true {
-		config.Msg("\nRunning auto migration")
+		config.Msg("\n-- Running auto migration")
 
 		// need to make this dynamic
 		if err := DB.AutoMigrate(&models.Account{}, &models.User{}); err != nil {
