@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/django"
 	"github.com/joho/godotenv"
 )
 
@@ -15,18 +16,12 @@ func main() {
 
 	godotenv.Load()
 
+	// templating engine for authentication views
+	engine := django.New("./views", ".html")
+
 	app := fiber.New(fiber.Config{
-		// TODO: refactor in middleware
-		ErrorHandler: func(ctx *fiber.Ctx, err error) error {
-
-			ctx.Set(fiber.HeaderContentType, fiber.MIMETextPlainCharsetUTF8)
-			ctx.JSON(fiber.Map{
-				"success": false,
-				"error":   err.Error(),
-			})
-
-			return nil
-		},
+		ErrorHandler: middleware.ErrorHandler(),
+		Views:        engine,
 	})
 
 	// CHANGE TO true TO DROP THE DATABASE.
@@ -56,14 +51,18 @@ func main() {
 		return ctx.SendString("Api  running")
 	})
 
+	// static folder
+
+	app.Static("/", "./public")
+
 	// Routes groups
 
 	// public
 	usersAPI := app.Group("/api/users")
 
-	accountAPI := app.Group("/api/users/:userID/accounts", middleware.UserAuth())
+	accountAPI := app.Group("/api/users/:userID/accounts")
 
-	privateAPI := app.Group("/private/accounts/:accountID")
+	privateAPI := app.Group("/private/accounts/:userID")
 
 	// Routes Handlers
 	routes.UserHandler(usersAPI, db)

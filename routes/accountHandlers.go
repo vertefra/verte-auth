@@ -105,8 +105,7 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 
 	// @route	POST /api/users/:userID/accounts/login
 	// @desc	verify the Account for user with userID, checking username and password
-	// @key		only a key in the request body matching the one stored with the user id will allow to use
-	// 			this route
+	// @public
 
 	r.Post("/login", func(ctx *fiber.Ctx) error {
 
@@ -120,8 +119,6 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 		p := account.Password
 
 		// Get access key from headers
-
-		key := ctx.Get("key")
 
 		// Checking if username is a valid email
 		if utils.IsEmailValid(account.Username) == false {
@@ -137,13 +134,6 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 			return result.Error
 		}
 
-		// Comparing api keys
-
-		if key != account.Key {
-			err := fmt.Errorf("api key provided is not the same given when signed up")
-			return err
-		}
-
 		if err := bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(p)); err != nil {
 			return err
 		}
@@ -155,10 +145,12 @@ func AccountHandler(r fiber.Router, db *gorm.DB) {
 			return err
 		}
 
+		// should pull a redirect address from the database that is where you want
+		// the user to go if succesfully authenticated
+
 		ctx.JSON(fiber.Map{
 			"success": true,
 			"token":   t,
-			"key":     account.Key,
 		})
 
 		return nil
