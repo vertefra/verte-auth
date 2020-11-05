@@ -32,7 +32,7 @@ func main() {
 
 	// CHANGE TO true to CREATE A NEW DATABASE
 
-	if err := database.CreateDBIfNotExists(true); err != nil {
+	if err := database.CreateDBIfNotExists(false); err != nil {
 		config.Err("was not able to create a new database ")
 		os.Exit(1)
 	}
