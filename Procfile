@@ -1,1 +1,0 @@
-go build server.go && ./server prod
