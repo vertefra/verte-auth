@@ -1,2 +1,2 @@
 web:go build server.go
-web:./server
+web:./server prod
