@@ -1,5 +1,6 @@
 module github/vertefra/verte_auth_server
 
+// +heroku goVersion go1.13
 go 1.13
 
 require (
