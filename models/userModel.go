@@ -12,9 +12,21 @@ import (
 // User is the structure associated with all the user that use the provided service
 type User struct {
 	gorm.Model
-	Email    string `json:"email" gorm:"unique"`
-	Password string `json:"password"`
-	Key      string `json:"key"`
+	Email       string `json:"email" gorm:"unique"`
+	Password    string `json:"password"`
+	Key         string `json:"key"`
+	RedirectURL string `json:"redirectURL"`
+}
+
+// UpdateUser finds the user with id == u.ID and updates the values with the new values
+// in u
+func UpdateUser(db *gorm.DB, u *User) (bool, error) {
+	result := db.Model(&u).Updates(&u)
+	if result.Error != nil {
+		config.Err("Error in update user: ", result.Error)
+		return false, result.Error
+	}
+	return true, nil
 }
 
 // ParseUser returns the parsed body with user Struct
