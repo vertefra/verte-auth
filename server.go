@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/template/django"
 	"github.com/joho/godotenv"
 )
@@ -50,6 +51,8 @@ func main() {
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("Api  running")
 	})
+
+	app.Use(cors.New())
 
 	// static folder
 
