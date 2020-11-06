@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/fatih/color"
@@ -14,31 +15,34 @@ var Err = color.New(color.FgHiRed).Add(color.Underline).Println
 var Msg = color.New(color.FgHiGreen).Println
 
 // Start define the environment variables of the application
-func start() config {
-	var c config
+func start() *config {
+
+	var c *config
+
+	loadEnv()
 
 	// flags
 
 	env := flag.String("env", "dev", "can be set 'dev' or 'prod' default 'dev'")
 	db := flag.String("db", "automigrate", "can be set 'drop', 'create', 'automigrate'")
 	dropTables := flag.Bool("dropTables", false, "set drop table to drop the existing tables")
+	connProdDB := flag.Bool("connProdDB", false, "connect to production db from local")
 	flag.Parse()
 
 	Msg("\n--env 			= ", *env)
 
 	// Evaluating environment
 	if *env == "dev" {
-
-		c = devConfig
+		c = initConfig("development")
 
 	} else if *env == "prod" {
+		c = initConfig("production")
 
-		c = prodConfig
+	} else if *env == "testDB" {
+		c = initConfig("testProdDatabase")
 
 	} else {
-
-		Err("Environment not valid running in development mode")
-
+		Err("Environment not valid")
 	}
 
 	// Evaluating DB options
@@ -71,6 +75,13 @@ func start() config {
 		c.MIGRATE = false
 	}
 
+	// evaluating remote connection with prodution db
+
+	if *connProdDB == true {
+		c.ENV = "testProdDatabase"
+		c.DATABASEURL = os.Getenv("DATABASE_URL")
+	}
+
 	// if len(cmd) == 1 {
 	// 	Err("No environment found, running development")
 	// 	c.ENV = "development"
@@ -88,6 +99,8 @@ func start() config {
 	// 	c.ENV = "production"
 	// 	c.InitConfig()
 	// }
+
+	fmt.Println("config ", c)
 
 	return c
 }
