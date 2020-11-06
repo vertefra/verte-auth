@@ -48,6 +48,8 @@ func ConnectDB(automigrate bool) (*gorm.DB, error) {
 
 }
 
+// CreateDBIfNotExists will create a new databse if not already present
+// DEVELOPMENT ONLY!!
 func CreateDBIfNotExists(confirm bool) error {
 
 	if confirm {
@@ -95,6 +97,7 @@ func CreateDBIfNotExists(confirm bool) error {
 }
 
 // DropDb executes the DROP DATABASE sql command with the db name given
+// ONLY DEVELOPMENT!!
 func DropDb(confirm bool) error {
 
 	if confirm {

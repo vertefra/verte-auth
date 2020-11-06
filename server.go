@@ -26,7 +26,7 @@ func main() {
 	})
 
 	// CHANGE TO true TO DROP THE DATABASE.
-	if err := database.DropDb(false); err != nil {
+	if err := database.DropDb(true); err != nil {
 		config.Err("was not able to drop the database")
 		os.Exit(1)
 	}
@@ -51,6 +51,8 @@ func main() {
 	app.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("Api  running")
 	})
+
+	// REMEMBER!!! SET REAL CORSE WHEN READY FOR PRODUCTION
 
 	app.Use(cors.New())
 
