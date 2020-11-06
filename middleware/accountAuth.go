@@ -23,6 +23,8 @@ type AccessDetails struct {
 func UserAuth() func(ctx *fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
 		key := config.AppConfig.KEY
+
+		config.Err("KEY found: ", key)
 		data, err := ExtractTokenMetadata(ctx, key)
 		if err != nil {
 			config.Err("Error in UserAuth")

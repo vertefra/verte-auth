@@ -10,12 +10,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/template/django"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-
-	godotenv.Load()
 
 	// templating engine for authentication views
 	engine := django.New("./views", ".html")
@@ -30,6 +27,7 @@ func main() {
 	config.Msg("- dropDb: 		", config.AppConfig.DROPDB)
 	config.Msg("- migrateTables:", config.AppConfig.MIGRATE)
 	config.Msg("- dropTables: 	", config.AppConfig.DROPTABLES)
+	config.Msg("- system Key	", config.AppConfig.KEY)
 
 	if config.AppConfig.DROPDB {
 		if err := database.DropDb(); err != nil {
@@ -66,7 +64,7 @@ func main() {
 	// test route
 
 	app.Get("/", func(ctx *fiber.Ctx) error {
-		return ctx.SendString("Api  running")
+		return ctx.SendString("Api running")
 	})
 
 	// REMEMBER!!! SET REAL CORSE WHEN READY FOR PRODUCTION

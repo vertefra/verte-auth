@@ -20,9 +20,16 @@ func ConnectDB(automigrate bool) (*gorm.DB, error) {
 
 	if config.AppConfig.ENV == "development" {
 		url = "postgresql:///" + config.AppConfig.DBNAME
+	} else if config.AppConfig.ENV == "testProdDatabase" {
+		url = config.AppConfig.DATABASEURL
 	} else {
 		url = config.AppConfig.DBNAME
 	}
+
+	config.Msg("connecting to => ", url)
+	config.Msg("KEY ", config.AppConfig.KEY)
+
+	// url = config.AppConfig.DBNAME
 
 	// Opening database
 	DB, err := gorm.Open(postgres.Open(url), &gorm.Config{})
@@ -32,7 +39,7 @@ func ConnectDB(automigrate bool) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	config.Msg("-- database " + config.AppConfig.DBNAME + " connected!")
+	config.Msg("-- database connected!")
 
 	if automigrate == true {
 		config.Msg("\n-- Running auto migration")
@@ -56,8 +63,12 @@ func DropTables() error {
 
 	if config.AppConfig.ENV == "development" {
 		url = "postgresql:///" + config.AppConfig.DBNAME
+	} else if config.AppConfig.ENV == "testProdDatabase" {
+		url = config.AppConfig.DATABASEURL
+
 	} else {
 		url = config.AppConfig.DBNAME
+
 	}
 
 	DB, err := gorm.Open(postgres.Open(url), &gorm.Config{})
