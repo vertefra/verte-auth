@@ -2,30 +2,44 @@ package config
 
 import (
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 var (
 	port = os.Getenv("PORT")
 )
 
-func (c *config) InitConfig() {
-	godotenv.Load()
+type config struct {
+	ENV        string
+	PORT       string
+	DBNAME     string
+	USER       string
+	KEY        string
+	DROPDB     bool
+	CREATEDB   bool
+	MIGRATE    bool
+	DROPTABLES bool
+}
 
-	// development configuration
-	if c.ENV == "development" {
-		c.PORT = os.Getenv("PORT")
-		c.KEY = os.Getenv("KEY")
-		c.DBNAME = os.Getenv("DEV_DB")
-		c.USER = os.Getenv("DEV_USER")
-	}
+var devConfig = config{
+	ENV:        "development",
+	PORT:       "4999",
+	DBNAME:     "dev_verte_auth_db",
+	USER:       "verte",
+	KEY:        os.Getenv("KEY"),
+	DROPDB:     false,
+	CREATEDB:   false,
+	MIGRATE:    true,
+	DROPTABLES: false,
+}
 
-	if c.ENV == "production" {
-		c.PORT = os.Getenv("PORT")
-		c.KEY = os.Getenv("KEY")
-		c.DBNAME = os.Getenv("DATABASE_URL")
-		c.USER = os.Getenv("PROD_USER")
-	}
-
+var prodConfig = config{
+	ENV:        "production",
+	PORT:       os.Getenv("PORT"),
+	DBNAME:     os.Getenv("DATABASE_URL"),
+	USER:       os.Getenv("PROD_USER"),
+	KEY:        os.Getenv("KEY"),
+	DROPDB:     false,
+	CREATEDB:   false,
+	MIGRATE:    true,
+	DROPTABLES: false,
 }
