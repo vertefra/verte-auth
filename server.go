@@ -25,21 +25,38 @@ func main() {
 		Views:        engine,
 	})
 
-	// CHANGE TO true TO DROP THE DATABASE.
-	if err := database.DropDb(true); err != nil {
-		config.Err("was not able to drop the database")
-		os.Exit(1)
+	config.Msg("\nverifing database options: \n")
+	config.Msg("- createDb:		", config.AppConfig.CREATEDB)
+	config.Msg("- dropDb: 		", config.AppConfig.DROPDB)
+	config.Msg("- migrateTables:", config.AppConfig.MIGRATE)
+	config.Msg("- dropTables: 	", config.AppConfig.DROPTABLES)
+
+	if config.AppConfig.DROPDB {
+		if err := database.DropDb(); err != nil {
+			config.Err("was not able to drop the database")
+			os.Exit(1)
+		}
 	}
 
-	// CHANGE TO true to CREATE A NEW DATABASE
-
-	if err := database.CreateDBIfNotExists(false); err != nil {
-		config.Err("was not able to create a new database ")
-		os.Exit(1)
+	// Create new database
+	if config.AppConfig.CREATEDB {
+		if err := database.CreateDBIfNotExists(); err != nil {
+			config.Err("\nwas not able to create a new database ")
+			os.Exit(1)
+		}
 	}
 
-	// initialize the automigration for the database
-	db, err := database.ConnectDB(true)
+	// Drop tables if flag dropTables is called
+
+	if config.AppConfig.DROPTABLES {
+		if err := database.DropTables(); err != nil {
+			config.Err("Cannot drop tables")
+			os.Exit(1)
+		}
+	}
+
+	// Initialize the automigration for the database
+	db, err := database.ConnectDB(config.AppConfig.MIGRATE)
 	if err != nil {
 		config.Err("\nFailed connecting database ")
 		config.Err("Error: ", err)

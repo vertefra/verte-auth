@@ -4,6 +4,7 @@ import (
 	"context"
 	"github/vertefra/verte_auth_server/config"
 	"github/vertefra/verte_auth_server/models"
+	"os"
 	"strings"
 
 	"github.com/jackc/pgx/v4"
@@ -48,81 +49,103 @@ func ConnectDB(automigrate bool) (*gorm.DB, error) {
 
 }
 
+// DropTables drops the edxisting tables
+func DropTables() error {
+
+	var url string
+
+	if config.AppConfig.ENV == "development" {
+		url = "postgresql:///" + config.AppConfig.DBNAME
+	} else {
+		url = config.AppConfig.DBNAME
+	}
+
+	DB, err := gorm.Open(postgres.Open(url), &gorm.Config{})
+	if err != nil {
+		config.Err("\nError while opening database: ", config.AppConfig.DBNAME)
+		config.Err("Error: ", err)
+		return err
+	}
+
+	if err := DB.Migrator().DropTable(&models.User{}, &models.Account{}); err != nil {
+		config.Err("\nError dropping tables")
+		config.Err("Error: ", err)
+		os.Exit(1)
+	}
+	config.Msg("\nTables dropped!\n")
+	os.Exit(0)
+	return nil
+}
+
 // CreateDBIfNotExists will create a new databse if not already present
 // DEVELOPMENT ONLY!!
-func CreateDBIfNotExists(confirm bool) error {
+func CreateDBIfNotExists() error {
 
-	if confirm {
-		dbName := config.AppConfig.DBNAME
-		user := config.AppConfig.USER
+	dbName := config.AppConfig.DBNAME
+	user := config.AppConfig.USER
 
-		conn, err := pgx.Connect(context.Background(), "postgresql:///"+user)
+	conn, err := pgx.Connect(context.Background(), "postgresql:///"+user)
 
-		if err != nil {
-			config.Err("\nCan't connect to ", dbName)
-			config.Err("Error: ", err)
-			return err
-		}
-
-		check := strings.TrimSpace("SELECT EXISTS(SELECT datname FROM pg_catalog.pg_database WHERE datname = '" + dbName + "');")
-
-		row := conn.QueryRow(context.Background(), check)
-
-		var exist bool
-		err = row.Scan(&exist)
-
-		if err != nil {
-			config.Err("error during scanning: ", err)
-			return err
-		}
-
-		if exist == false {
-			sqlCmd := "CREATE DATABASE " + dbName + ";"
-			_, err := conn.Exec(context.Background(), sqlCmd)
-			if err != nil {
-				config.Err("Error creating DB: ", err)
-				return err
-			}
-			config.Msg("Database %s created ", dbName)
-		} else if exist == true {
-			config.Msg("\nFound a db with name: ", dbName)
-		}
-
-		conn.Close(context.Background())
-
-		return nil
-	} else {
-		return nil
+	if err != nil {
+		config.Err("\nCan't connect to ", dbName)
+		config.Err("Error: ", err)
+		return err
 	}
+
+	check := strings.TrimSpace("SELECT EXISTS(SELECT datname FROM pg_catalog.pg_database WHERE datname = '" + dbName + "');")
+
+	row := conn.QueryRow(context.Background(), check)
+
+	var exist bool
+	err = row.Scan(&exist)
+
+	if err != nil {
+		config.Err("error during scanning: ", err)
+		return err
+	}
+
+	if exist == false {
+		sqlCmd := "CREATE DATABASE " + dbName + ";"
+		_, err := conn.Exec(context.Background(), sqlCmd)
+		if err != nil {
+			config.Err("Error creating DB: ", err)
+			return err
+		}
+		config.Msg("Database created: ", dbName)
+	} else if exist == true {
+		config.Msg("\nFound a db with name: ", dbName)
+	}
+
+	conn.Close(context.Background())
+	config.Msg("Database Created")
+	os.Exit(0)
+	return nil
 }
 
 // DropDb executes the DROP DATABASE sql command with the db name given
 // ONLY DEVELOPMENT!!
-func DropDb(confirm bool) error {
+func DropDb() error {
 
-	if confirm {
-		dbName := config.AppConfig.DBNAME
-		user := config.AppConfig.USER
+	dbName := config.AppConfig.DBNAME
+	user := config.AppConfig.USER
 
-		conn, err := pgx.Connect(context.Background(), "postgresql:///"+user)
+	conn, err := pgx.Connect(context.Background(), "postgresql:///"+user)
 
-		if err != nil {
-			config.Err("\nCan't connect to ", dbName)
-			config.Err("Error: ", err)
-			return err
-		}
-		sqlCmd := "DROP DATABASE " + dbName + ";"
-
-		_, err = conn.Exec(context.Background(), sqlCmd)
-
-		if err != nil {
-			config.Err("Error dropping database ", dbName)
-			config.Err("Error: ", err)
-			return err
-		}
-		config.Err("Your database has been erased")
-		return nil
-	} else {
-		return nil
+	if err != nil {
+		config.Err("\nCan't connect to ", dbName)
+		config.Err("Error: ", err)
+		return err
 	}
+	sqlCmd := "DROP DATABASE " + dbName + ";"
+
+	_, err = conn.Exec(context.Background(), sqlCmd)
+
+	if err != nil {
+		config.Err("Error dropping database ", dbName)
+		config.Err("Error: ", err)
+		return err
+	}
+	config.Err("Your database has been erased")
+	os.Exit(0)
+	return nil
 }

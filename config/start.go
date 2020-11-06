@@ -2,18 +2,10 @@ package config
 
 import (
 	"flag"
-	"fmt"
+	"os"
 
 	"github.com/fatih/color"
 )
-
-type config struct {
-	ENV    string
-	PORT   string
-	DBNAME string
-	USER   string
-	KEY    string
-}
 
 // Err for displaying error in Red underlined color
 var Err = color.New(color.FgHiRed).Add(color.Underline).Println
@@ -30,14 +22,54 @@ func start() config {
 	env := flag.String("env", "dev", "can be set 'dev' or 'prod' default 'dev'")
 	db := flag.String("db", "automigrate", "can be set 'drop', 'create', 'automigrate'")
 	dropTables := flag.Bool("dropTables", false, "set drop table to drop the existing tables")
-
 	flag.Parse()
 
-	Msg("--env 			= ", *env)
-	Msg("--db 			= ", *db)
-	Msg("--dropTables 	= ", *dropTables)
+	Msg("\n--env 			= ", *env)
 
-	fmt.Println(flag.Args)
+	// Evaluating environment
+	if *env == "dev" {
+
+		c = devConfig
+
+	} else if *env == "prod" {
+
+		c = prodConfig
+
+	} else {
+
+		Err("Environment not valid running in development mode")
+
+	}
+
+	// Evaluating DB options
+	if *db == "automigrate" {
+
+		c.MIGRATE = true
+
+	} else if *db == "drop" {
+
+		if c.ENV == "production" {
+			Err("Cannot drop database in production")
+			os.Exit(1)
+		}
+		c.DROPDB = true
+
+	} else if *db == "create" {
+
+		if c.ENV == "production" {
+			Err("Cannot create database in production")
+			os.Exit(1)
+		}
+
+		c.CREATEDB = true
+	}
+
+	// evaluating table dropping
+
+	if *dropTables == true {
+		c.DROPTABLES = true
+		c.MIGRATE = false
+	}
 
 	// if len(cmd) == 1 {
 	// 	Err("No environment found, running development")
