@@ -2,6 +2,62 @@
 
 ## authentication service for multiple projects
 
+
+## startup options:
+
+`go run server.go`
+- default production environment setup:
+```
+ENV:         "development",
+PORT:        "4999",
+DBNAME:      "dev_verte_auth_db",
+USER:        "verte",
+KEY:         os.Getenv("KEY"),
+DROPDB:      false,
+CREATEDB:    false,
+MIGRATE:     true,
+DROPTABLES:  false,
+DATABASEURL: "",
+```
+
+- production environment setup
+`go run server.go -env=prod`
+
+```
+ENV:        "production",
+PORT:       os.Getenv("PORT"),
+DBNAME:     os.Getenv("DATABASE_URL"),
+USER:       os.Getenv("PROD_USER"),
+KEY:        os.Getenv("KEY"),
+DROPDB:     false,
+CREATEDB:   false,
+MIGRATE:    true,
+DROPTABLES: false,
+```
+
+- test production database env
+`go run server.go -env=testDB`
+
+```
+ENV:         "testProdDatabase",
+    PORT:        "4999",
+    DBNAME:      "testing real db",
+    USER:        os.Getenv("PROD_USER"),
+    KEY:         os.Getenv("KEY"),
+    DROPDB:      false,
+    CREATEDB:    false,
+    MIGRATE:     false,
+    DROPTABLES:  false,
+    DATABASEURL: os.Getenv("DATABASE_URL"),
+```
+
+### options:
+- [env] , **dev**(default), **prod**, **testDB**
+- [db] , **automigrate**(default), **drop** , **create** (drop and create only production env)
+- [dropTables] **false**(default), **true** => drops all the tables in the db
+- [connProd] **false**(default) **true** =>   connects with production database
+
+
 ## notes about api
 
 ### new user signup
